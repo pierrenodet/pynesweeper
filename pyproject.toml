@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pynesweeper"
+dynamic = ["version"]
+description = 'a 2048 game in Python'
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Pierre Nodet", email = "nodet.pierre@gmail.com" },
+]
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "click",
+  "numpy",
+  "scipy",
+]
+
+[project.urls]
+Documentation = "https://github.com/pierrenodet/pynesweeper#readme"
+Issues = "https://github.com/pierrenodet/pynesweeper/issues"
+Source = "https://github.com/pierrenodet/pynesweeper"
+
+[project.scripts]
+pynesweeper = "pynesweeper.cli:pynesweeper"
+
+[tool.hatch.version]
+source = "vcs"
