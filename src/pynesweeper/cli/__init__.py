@@ -25,7 +25,7 @@ def pynesweeper(difficulty, seed):
     x, y = (0, 0)
     click.clear()
     click.echo(board.show((x, y)))
-    while not board.won():
+    while not board.won() and not board.gameover():
         c = click.getchar()
         if c in arrow_keys:
             if c == "\x1b[A" and x > 0:
@@ -44,5 +44,9 @@ def pynesweeper(difficulty, seed):
             else:
                 board.unmark(x, y)
         click.clear()
+        click.echo(board.show((x, y)))
+    if board.gameover():
+        click.clear()
+        board.discovered[:] = True
         click.echo(board.show((x, y)))
     return board
