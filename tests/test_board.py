@@ -4,7 +4,7 @@ from pynesweeper import Board, Difficulty
 
 
 def test_board():
-    board = Board.make_board(np.random.default_rng(1), difficulty=Difficulty.DEBUG)
+    board = Board.make_board(np.random.default_rng(1), difficulty=Difficulty.EASY)
     board.detonate(0, 0)
     board.detonate(1, 0)
     board.detonate(2, 0)
