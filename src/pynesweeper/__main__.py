@@ -78,8 +78,6 @@ def main():
                         else:
                             board.unflag(x, y)
 
-                stdscr.addstr(f" {bstate}")
-
         if go := board.gameover():
             board.discovered[:] = True
         display(stdscr, board)
