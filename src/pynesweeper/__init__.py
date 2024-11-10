@@ -50,11 +50,11 @@ class Board:
     neighbours: np.ndarray
 
     discovered: np.ndarray = field(init=False)
-    marked: np.ndarray = field(init=False)
+    flagged: np.ndarray = field(init=False)
 
     def __post_init__(self):
         self.discovered = np.zeros_like(self.mined, dtype=bool)
-        self.marked = np.zeros_like(self.mined, dtype=bool)
+        self.flagged = np.zeros_like(self.mined, dtype=bool)
 
     def __contains__(self, xy):
         x, y = xy
@@ -62,7 +62,8 @@ class Board:
         return x >= 0 and x < xmax and y >= 0 and y < ymax
 
     @classmethod
-    def make_board(cls, rng, difficulty=Difficulty.MEDIUM):
+    def make_board(cls, seed=None, difficulty=Difficulty.MEDIUM):
+        rng = np.random.default_rng(seed)
         mined = rng.binomial(1, difficulty.pbomb, size=difficulty.size).astype(bool)
         neighbours = signal.convolve(mined, KERNEL, mode="same")
         return cls(mined, neighbours)
@@ -76,23 +77,22 @@ class Board:
         s[self.neighbours > 0] = self.neighbours[self.neighbours > 0].astype("U1")
         s[self.mined] = "@"
         s[~self.discovered] = "■"
-        s[self.marked] = "✕"
+        s[self.flagged] = "F"
         return s
 
-    @property
     def cues(self):
         c = np.zeros(self.shape, dtype=int)
-        mask = (self.neighbours > 0) & self.discovered & ~self.marked & ~self.mined
+        mask = (self.neighbours > 0) & self.discovered & ~self.flagged & ~self.mined
         c[mask] = self.neighbours[mask]
         return c
 
-    def mark(self, x, y):
+    def flag(self, x, y):
         if not self.discovered[x, y]:
-            self.marked[x, y] = True
+            self.flagged[x, y] = True
 
-    def unmark(self, x, y):
-        if self.marked[x, y]:
-            self.marked[x, y] = False
+    def unflag(self, x, y):
+        if self.flagged[x, y]:
+            self.flagged[x, y] = False
 
     def won(self):
         return np.all(self.mined[~self.discovered])
@@ -102,7 +102,7 @@ class Board:
 
     @property
     def remaining_mines(self) -> int:
-        return (np.sum(self.mined) - np.sum(self.marked)).item()
+        return (np.sum(self.mined) - np.sum(self.flagged)).item()
 
     def detonate(self, x, y):
         if not self.discovered[x, y]:
