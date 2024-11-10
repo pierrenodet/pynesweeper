@@ -104,8 +104,15 @@ class Board:
     def remaining_mines(self) -> int:
         return (np.sum(self.mined) - np.sum(self.flagged)).item()
 
+    def chord(self, x, y):
+        flag_neighbours = signal.convolve(self.flagged, KERNEL, mode="same")
+        if self.discovered[x, y] and self.neighbours[x, y] == flag_neighbours[x, y]:
+            for xx, yy in product([x - 1, x, x + 1], [y - 1, y, y + 1]):
+                if (xx, yy) in self:
+                    self.detonate(xx, yy)
+
     def detonate(self, x, y):
-        if not self.discovered[x, y]:
+        if not self.discovered[x, y] and not self.flagged[x, y]:
             self.discovered[x, y] = True
             if self.neighbours[x, y] == 0:
                 for xx, yy in product([x - 1, x, x + 1], [y - 1, y, y + 1]):
