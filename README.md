@@ -1,21 +1,21 @@
 # pynesweeper
 
-[![PyPI - Version](https://img.shields.io/pypi/v/pynesweeper.svg)](https://pypi.org/project/pynesweeper)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pynesweeper.svg)](https://pypi.org/project/pynesweeper)
+A minesweeper game in Python that runs in your terminal.
 
------
+<img src="screenshot.png" alt="screenshot" width="200"/>
 
-## Table of Contents
-
-- [Installation](#installation)
-- [License](#license)
-
-## Installation
+## Install
 
 ```console
-pip install pynesweeper
+pipx install git+https://github.com/pierrenodet/pynesweeper.git
 ```
 
-## License
+## Run
 
-`pynesweeper` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+```console
+pynesweeper --help
+```
+
+## Commands
+
+Left click to detonate (or [chord](https://www.minesweeper.info/wiki/Chord)), right click to flag, good luck !

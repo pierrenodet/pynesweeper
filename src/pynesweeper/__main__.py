@@ -25,14 +25,14 @@ MAC_BUTTON2_PRESSED = 8192
 def main():
     parser = argparse.ArgumentParser(
         prog="pynesweeper",
-        description="a minesweeper game that runs in the terminal",
+        description="a minesweeper game in Python that runs in your terminal",
     )
     parser.add_argument(
         "-d",
         "--difficulty",
         type=Difficulty,
         choices=[difficulty.value for difficulty in Difficulty],
-        help="difficulty increases board size",
+        help="difficulty increases board size and pbomb",
         default=Difficulty.MEDIUM,
     )
     parser.add_argument("--seed", type=int, help="for replayable games")
