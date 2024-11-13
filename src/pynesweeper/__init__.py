@@ -41,6 +41,12 @@ class Difficulty(StrEnum):
                 return 0.25
 
 
+@dataclass
+class CustomDifficulty:
+    size: tuple[int, int]
+    pbomb: float
+
+
 KERNEL = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
 
 

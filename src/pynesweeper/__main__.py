@@ -5,7 +5,7 @@ import argparse
 import curses
 import sys
 
-from pynesweeper import Board, Difficulty
+from pynesweeper import Board, CustomDifficulty, Difficulty
 
 
 def display(win, board: Board, colors: dict):
@@ -34,13 +34,26 @@ def main():
         type=Difficulty,
         choices=[difficulty.value for difficulty in Difficulty],
         help="difficulty increases board size and pbomb",
-        default=Difficulty.MEDIUM,
     )
+    parser.add_argument("-s", "--size", type=int, nargs=2, help="board size")
+    parser.add_argument("-p", "--pbomb", type=float, help="bomb probability")
     parser.add_argument("--seed", type=int, help="for replayable games")
     args = parser.parse_args()
 
+    if args.size is not None and args.pbomb is not None:
+        difficulty = CustomDifficulty(args.size, args.pbomb)
+    elif args.difficulty is not None:
+        difficulty = args.difficulty
+    else:
+        print(
+            "You should either set the difficulty from predifined \
+values with -d or use a custom difficulty with -s and -p",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     try:
-        board = Board.make_board(args.seed, args.difficulty)
+        board = Board.make_board(args.seed, difficulty)
         x, y = (0, 0)
 
         stdscr = curses.initscr()
