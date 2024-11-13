@@ -8,15 +8,16 @@ import sys
 from pynesweeper import Board, Difficulty
 
 
-def display(win, board: Board):
+def display(win, board: Board, colors: dict):
     s = board.asstr()
     c = board.cues()
     for i in range(board.shape[0]):
         win.addstr(i, 0, " " + " ".join(s[i, :]) + " ")
         for j in range(board.shape[1]):
             if (n := c[i, j]) > 0:
-                win.chgat(i, 2 * j + 1, 1, curses.color_pair(n))
-    win.addstr(board.shape[0], 0, f"{board.remaining_mines}")
+                win.chgat(i, 2 * j + 1, 1, colors[n])
+    win.addstr(board.shape[0], 0, " " * board.shape[1])
+    win.addstr(board.shape[0], 0, f"{board.remaining_mines}/{board.mined.sum()}")
 
 
 MAC_BUTTON2_PRESSED = 8192
@@ -52,13 +53,15 @@ def main():
 
         stdscr.clear()
 
+        colors = {}
         curses.start_color()
         curses.use_default_colors()
         for i in range(1, 9):
             curses.init_pair(i, i, -1)
+            colors[i] = curses.color_pair(i)
 
         while not board.won() and not board.gameover():
-            display(stdscr, board)
+            display(stdscr, board, colors)
             key = stdscr.getch()
 
             if key == curses.KEY_MOUSE:
@@ -80,7 +83,8 @@ def main():
 
         if go := board.gameover():
             board.discovered[:] = True
-        display(stdscr, board)
+        display(stdscr, board, colors)
+        stdscr.addstr(board.shape[0], 0, " " * board.shape[1])
         stdscr.addstr(board.shape[0], 0, "BOOM" if go else "WON")
         stdscr.getch()
 
