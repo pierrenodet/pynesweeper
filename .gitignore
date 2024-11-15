@@ -167,5 +167,5 @@ cython_debug/
 # mac
 .DS_Store
 
-#project specific
-benchmark/
+# ruff
+.ruff_cache/
