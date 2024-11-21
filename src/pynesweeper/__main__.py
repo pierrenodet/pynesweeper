@@ -20,7 +20,7 @@ def display(win, board: Board, colors: dict):
     win.addstr(board.shape[0], 0, f"{board.remaining_mines}/{board.mined.sum()}")
 
 
-MAC_BUTTON2_PRESSED = 8192
+MAC_BUTTON3_PRESSED = 8192
 
 
 def main():
@@ -88,7 +88,7 @@ values with -d or use a custom difficulty with -s and -p",
                         else:
                             board.chord(x, y)
 
-                    if bstate & (curses.BUTTON2_PRESSED | MAC_BUTTON2_PRESSED):
+                    if bstate & (curses.BUTTON3_PRESSED | MAC_BUTTON3_PRESSED):
                         if not board.flagged[x, y]:
                             board.flag(x, y)
                         else:
