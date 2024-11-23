@@ -53,12 +53,13 @@ KERNEL = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
 @dataclass
 class Board:
     mined: np.ndarray
-    neighbours: np.ndarray
 
+    neighbours: np.ndarray = field(init=False)
     discovered: np.ndarray = field(init=False)
     flagged: np.ndarray = field(init=False)
 
     def __post_init__(self):
+        self.neighbours = signal.convolve(self.mined, KERNEL, mode="same")
         self.discovered = np.zeros_like(self.mined, dtype=bool)
         self.flagged = np.zeros_like(self.mined, dtype=bool)
 
@@ -71,8 +72,7 @@ class Board:
     def make_board(cls, seed=None, difficulty=Difficulty.MEDIUM):
         rng = np.random.default_rng(seed)
         mined = rng.binomial(1, difficulty.pbomb, size=difficulty.size).astype(bool)
-        neighbours = signal.convolve(mined, KERNEL, mode="same")
-        return cls(mined, neighbours)
+        return cls(mined)
 
     @property
     def shape(self):
