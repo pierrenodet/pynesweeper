@@ -7,7 +7,7 @@ A minesweeper game in Python that runs in your terminal.
 ## Install
 
 ```console
-pipx install git+https://github.com/pierrenodet/pynesweeper.git
+pipx install pynesweeper
 ```
 
 ## Run
