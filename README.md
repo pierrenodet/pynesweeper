@@ -18,4 +18,4 @@ pynesweeper --help
 
 ## Commands
 
-Left click to detonate (or [chord](https://www.minesweeper.info/wiki/Chord)), right click to flag, good luck !
+Left click to detonate (or [chord](https://minesweepergame.com/strategy/efficiency.php)), right click to flag, good luck !
