@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "pynesweeper"
 dynamic = ["version"]
-description = 'a minesweeper game in Python that runs in your terminal'
+description = 'A minesweeper game in Python that runs in your terminal.'
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
