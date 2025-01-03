@@ -4,23 +4,58 @@
 import argparse
 import curses
 import sys
+from contextlib import contextmanager
 
 from pynesweeper import Board, CustomDifficulty, Difficulty
 
 
-def display(win, board: Board, colors: dict):
+def display(screen: curses.window, board: Board, colors: dict):
     s = board.asstr()
     c = board.cues()
     for i in range(board.shape[0]):
-        win.addstr(i, 0, " " + " ".join(s[i, :]) + " ")
+        screen.addstr(i, 0, " ".join(s[i, :]))
         for j in range(board.shape[1]):
             if (n := c[i, j]) > 0:
-                win.chgat(i, 2 * j + 1, 1, colors[n])
-    win.addstr(board.shape[0], 0, " " * board.shape[1])
-    win.addstr(board.shape[0], 0, f"{board.remaining_mines}/{board.mined.sum()}")
+                screen.chgat(i, 2 * j, 1, colors[n])
+    screen.addstr(board.shape[0], 0, " " * board.shape[1])
+    screen.addstr(board.shape[0], 0, f"{board.remaining_mines}/{board.mined.sum()}")
 
 
 MAC_BUTTON3_PRESSED = 8192
+
+
+@contextmanager
+def stdscr(shape: tuple[int, int] | None = None):
+    try:
+        s = curses.initscr()
+        x, y = s.getmaxyx()
+        if shape is not None:
+            h, w = shape
+            err = []
+            for dim, size, bound in [("rows", h, x - 1), ("cols", w, (y + 1) // 2)]:
+                if size > bound:
+                    err += [f"{dim} ({size}>{bound})"]
+            if err:
+                print(
+                    f"You asked for too many {" and ".join(err)}, increase the terminal size or ask for less.",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+        curses.cbreak()
+        curses.noecho()
+        curses.curs_set(0)
+        s.keypad(True)
+        curses.mousemask(-1)
+        curses.mouseinterval(0)
+        s.clear()
+        yield s
+    finally:
+        curses.nocbreak()
+        curses.curs_set(1)
+        s.keypad(False)
+        curses.echo()
+        curses.flushinp()
+        curses.endwin()
 
 
 def main():
@@ -46,26 +81,14 @@ def main():
         difficulty = args.difficulty
     else:
         print(
-            "You should either set the difficulty from predifined \
-values with -d or use a custom difficulty with -s and -p",
+            "You should either set the difficulty from predifined values with -d or use a custom difficulty with -s and -p",
             file=sys.stderr,
         )
         sys.exit(1)
 
-    try:
-        board = Board.make_board(args.seed, difficulty)
-        x, y = (0, 0)
+    board = Board.make_board(args.seed, difficulty)
 
-        stdscr = curses.initscr()
-        curses.cbreak()
-        curses.noecho()
-        curses.curs_set(0)
-        stdscr.keypad(True)
-        curses.mousemask(-1)
-        curses.mouseinterval(0)
-
-        stdscr.clear()
-
+    with stdscr(board.shape) as s:
         colors = {}
         curses.start_color()
         curses.use_default_colors()
@@ -73,13 +96,13 @@ values with -d or use a custom difficulty with -s and -p",
             curses.init_pair(i, i, -1)
             colors[i] = curses.color_pair(i)
 
-        while not board.won() and not board.gameover():
-            display(stdscr, board, colors)
-            key = stdscr.getch()
+        while not board.won() and not (go := board.gameover()):
+            display(s, board, colors)
+            key = s.getch()
 
             if key == curses.KEY_MOUSE:
                 _, yy, x, _, bstate = curses.getmouse()
-                y = (yy - 1) // 2
+                y = yy // 2
 
                 if (x, y) in board:
                     if bstate & (curses.BUTTON1_CLICKED | curses.BUTTON1_RELEASED):
@@ -94,20 +117,12 @@ values with -d or use a custom difficulty with -s and -p",
                         else:
                             board.unflag(x, y)
 
-        if go := board.gameover():
+        if go:
             board.discovered[:] = True
-        display(stdscr, board, colors)
-        stdscr.addstr(board.shape[0], 0, " " * board.shape[1])
-        stdscr.addstr(board.shape[0], 0, "BOOM" if go else "WON")
-        stdscr.getch()
-
-    finally:
-        curses.nocbreak()
-        curses.curs_set(1)
-        stdscr.keypad(False)
-        curses.echo()
-        curses.flushinp()
-        curses.endwin()
+        display(s, board, colors)
+        s.addstr(board.shape[0], 0, " " * board.shape[1])
+        s.addstr(board.shape[0], 0, "BOOM" if go else "WON")
+        s.getch()
 
 
 if __name__ == "__main__":
