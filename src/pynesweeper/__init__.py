@@ -2,77 +2,55 @@
 #
 # SPDX-License-Identifier: MIT
 
-from dataclasses import dataclass, field
-from enum import StrEnum
+from enum import Enum
 from itertools import product
 
 import numpy as np
 from scipy import signal
 
 
-class Difficulty(StrEnum):
-    EASY = "e"
-    MEDIUM = "m"
-    HARD = "h"
-    VERY_HARD = "hh"
+class Difficulty(Enum):
+    EASY = (4, 5), 0.1
+    MEDIUM = (8, 12), 0.15
+    HARD = (12, 24), 0.2
+    VERY_HARD = (16, 28), 0.25
 
-    @property
-    def size(self):
-        match self:
-            case Difficulty.EASY:
-                return (4, 5)
-            case Difficulty.MEDIUM:
-                return (8, 12)
-            case Difficulty.HARD:
-                return (12, 24)
-            case Difficulty.VERY_HARD:
-                return (16, 28)
+    def __init__(self, size, pbomb):
+        self.size = size
+        self.pbomb = pbomb
 
-    @property
-    def pbomb(self):
-        match self:
-            case Difficulty.EASY:
-                return 0.1
-            case Difficulty.MEDIUM:
-                return 0.15
-            case Difficulty.HARD:
-                return 0.2
-            case Difficulty.VERY_HARD:
-                return 0.25
+    def __str__(self):
+        return self.name
 
-
-@dataclass
-class CustomDifficulty:
-    size: tuple[int, int]
-    pbomb: float
+    @staticmethod
+    def from_string(s):
+        try:
+            return Difficulty[s]
+        except KeyError as exc:
+            raise ValueError from exc
 
 
 KERNEL = np.array([[1, 1, 1], [1, 0, 1], [1, 1, 1]])
 
 
-@dataclass
 class Board:
-    mined: np.ndarray
+    def __init__(self, mined):
+        self.mined = mined
 
-    neighbours: np.ndarray = field(init=False)
-    discovered: np.ndarray = field(init=False)
-    flagged: np.ndarray = field(init=False)
-
-    def __post_init__(self):
         self.neighbours = signal.convolve(self.mined, KERNEL, mode="same")
         self.discovered = np.zeros_like(self.mined, dtype=bool)
         self.flagged = np.zeros_like(self.mined, dtype=bool)
+
+    @classmethod
+    def make_board(cls, difficulty, *, seed=None):
+        rng = np.random.default_rng(seed)
+        mined = rng.binomial(1, difficulty.pbomb, size=difficulty.size).astype(bool)
+        return cls(mined)
 
     def __contains__(self, xy):
         x, y = xy
         xmax, ymax = self.mined.shape
         return x >= 0 and x < xmax and y >= 0 and y < ymax
-
-    @classmethod
-    def make_board(cls, seed=None, difficulty=Difficulty.MEDIUM):
-        rng = np.random.default_rng(seed)
-        mined = rng.binomial(1, difficulty.pbomb, size=difficulty.size).astype(bool)
-        return cls(mined)
 
     @property
     def shape(self):

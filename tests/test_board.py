@@ -2,7 +2,7 @@ from pynesweeper import Board, Difficulty
 
 
 def test_board():
-    board = Board.make_board(1, difficulty=Difficulty.EASY)
+    board = Board.make_board(Difficulty.EASY, seed=1)
     board.detonate(0, 0)
     board.detonate(1, 0)
     board.detonate(2, 0)

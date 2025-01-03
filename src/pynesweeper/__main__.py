@@ -1,12 +1,13 @@
 # SPDX-FileCopyrightText: 2024-present Pierre Nodet <nodet.pierre@gmail.com>
 #
 # SPDX-License-Identifier: MIT
+
 import argparse
 import curses
 import sys
 from contextlib import contextmanager
 
-from pynesweeper import Board, CustomDifficulty, Difficulty
+from pynesweeper import Board, Difficulty
 
 
 def display(screen: curses.window, board: Board, colors: dict):
@@ -62,12 +63,13 @@ def main():
     parser = argparse.ArgumentParser(
         prog="pynesweeper",
         description="a minesweeper game in Python that runs in your terminal",
+        formatter_class=argparse.MetavarTypeHelpFormatter,
     )
     parser.add_argument(
         "-d",
         "--difficulty",
-        type=Difficulty,
-        choices=[difficulty.value for difficulty in Difficulty],
+        type=Difficulty.from_string,
+        choices=list(Difficulty),
         help="difficulty increases board size and pbomb",
     )
     parser.add_argument("-s", "--size", type=int, nargs=2, help="board size")
@@ -75,10 +77,14 @@ def main():
     parser.add_argument("--seed", type=int, help="for replayable games")
     args = parser.parse_args()
 
-    if args.size is not None and args.pbomb is not None:
-        difficulty = CustomDifficulty(args.size, args.pbomb)
-    elif args.difficulty is not None:
+    if args.difficulty is not None:
         difficulty = args.difficulty
+        if args.size is not None:
+            difficulty.size = args.size
+        if args.pbomb is not None:
+            difficulty.pbomb = args.pbomb
+    elif args.size is not None and args.pbomb is not None:
+        difficulty = Difficulty(args.size, args.pbomb)
     else:
         print(
             "You should either set the difficulty from predifined values with -d or use a custom difficulty with -s and -p",
@@ -86,7 +92,7 @@ def main():
         )
         sys.exit(1)
 
-    board = Board.make_board(args.seed, difficulty)
+    board = Board.make_board(difficulty, seed=args.seed)
 
     with stdscr(board.shape) as s:
         colors = {}
